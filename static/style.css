@@ -80,10 +80,11 @@ img { display: block; max-width: 100%; }
   flex: none;
   display: grid; justify-items: center;
   min-width: 112px;
-  background: var(--sheet); color: var(--ink);
+  --band: 14px;
+  background: linear-gradient(var(--red) 0 var(--band), var(--sheet) var(--band));
+  color: var(--ink);
   border-radius: var(--r-md);
-  border-top: 14px solid var(--red);
-  padding: 8px 14px 10px;
+  padding: calc(var(--band) + 8px) 14px 10px;
   box-shadow: 0 2px 0 oklch(0.2 0.02 165 / 0.35), 0 10px 24px -12px oklch(0.1 0.02 165 / 0.6);
   transform: rotate(2deg);
   text-align: center;
@@ -361,7 +362,7 @@ textarea {
 .who { font-weight: 600; color: var(--ink); }
 .entry-meta time { margin-left: auto; font-variant-numeric: tabular-nums; }
 
-.entry-title { margin: 8px 0 4px; font-size: 1.125rem; line-height: 1.5; font-weight: 700; }
+.entry-title { margin: 8px 0 6px; font-size: 1.25rem; line-height: 1.45; font-weight: 700; }
 .hl {
   background-image: linear-gradient(transparent 58%, var(--marker) 58%, var(--marker) 92%, transparent 92%);
   background-repeat: no-repeat;
@@ -446,7 +447,7 @@ textarea {
   .head-inner { padding: 20px 16px 22px; gap: 14px; }
   .board-head h1 { font-size: 1.75rem; }
   .lede { font-size: 0.875rem; }
-  .countdown { min-width: 92px; padding: 6px 10px 8px; border-top-width: 10px; }
+  .countdown { --band: 10px; min-width: 92px; padding: calc(var(--band) + 6px) 10px 8px; }
   .cd-num { font-size: 2.25rem; }
   .solve-hint { display: none; }
 }
