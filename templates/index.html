@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>テスト前ヘルプ板</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="hero" style="background-image:url('{{ hero }}')">
+  <div class="hero-inner">
+    <h1>テスト前ヘルプ板</h1>
+    <p>わからない問題、写真でサクッと聞こう。高校生どうしで教え合う掲示板。</p>
+    <div class="countdown">
+      {% if days_left > 0 %}{{ exam_name }}まで あと <strong>{{ days_left }}</strong> 日
+      {% elif days_left == 0 %}{{ exam_name }} 当日！がんばれ！
+      {% else %}{{ exam_name }} おつかれさま！{% endif %}
+    </div>
+  </div>
+</header>
+
+<main>
+  <nav class="tabs">
+    <a href="{{ url_for('index') }}" class="{{ 'on' if not current }}">すべて</a>
+    {% for s in subjects %}
+      <a href="{{ url_for('index', subject=s) }}" class="{{ 'on' if current == s }}">{{ s }}</a>
+    {% endfor %}
+  </nav>
+
+  <section class="card form">
+    <h2>質問する</h2>
+    <form action="{{ url_for('post') }}" method="post" enctype="multipart/form-data">
+      <input type="hidden" name="back" value="{{ current or '' }}">
+      <div class="row">
+        <input name="nickname" maxlength="20" placeholder="ニックネーム（空欄で匿名）">
+        <select name="subject">
+          {% for s in subjects %}<option {{ 'selected' if current == s }}>{{ s }}</option>{% endfor %}
+        </select>
+      </div>
+      <input name="title" maxlength="60" required placeholder="タイトル（例：二次関数の最大値がわからない）">
+      <textarea name="body" maxlength="1000" required rows="4" placeholder="どこでつまずいたか書こう"></textarea>
+      <label class="file">問題の写真（任意）<input type="file" name="image" accept="image/*"></label>
+      <button type="submit">投稿する</button>
+    </form>
+  </section>
+
+  {% for p in posts %}
+  <article class="card post {{ 'solved' if p.solved }}">
+    <div class="meta">
+      <span class="tag">{{ p.subject }}</span>
+      {% if p.solved %}<span class="badge">解決済み</span>{% endif %}
+      <span class="who">{{ p.nickname }} ・ {{ p.created }}</span>
+    </div>
+    <h3>{{ p.title }}</h3>
+    <p class="body">{{ p.body }}</p>
+    {% if p.image %}<a href="{{ p.image }}" target="_blank"><img src="{{ p.image }}" alt="問題の写真" loading="lazy"></a>{% endif %}
+    {% if not p.solved %}
+    <form action="{{ url_for('solve', row_key=p.RowKey) }}" method="post">
+      <button class="ok" type="submit">わかった！（解決）</button>
+    </form>
+    {% endif %}
+  </article>
+  {% else %}
+  <p class="empty">まだ質問はありません。最初の質問をしてみよう！</p>
+  {% endfor %}
+</main>
+
+<footer><a href="{{ url_for('static', filename='about.html') }}">この掲示板について</a></footer>
+</body>
+</html>

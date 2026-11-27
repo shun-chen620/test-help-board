@@ -1,0 +1,4 @@
+flask==3.1.*
+gunicorn==23.*
+azure-data-tables==12.*
+azure-storage-blob==12.*
