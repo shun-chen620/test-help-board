@@ -417,7 +417,7 @@ textarea {
   background-size: 100% 1.8rem;
   background-color: var(--sheet);
 }
-.empty p { max-width: 36ch; margin: 0 auto 8px; line-height: 1.8rem; }
+.empty p { max-width: 36ch; margin: 0 auto 8px; line-height: 1.8rem; word-break: auto-phrase; text-wrap: balance; }
 .empty-title { font-family: var(--font-hand); font-weight: 600; font-size: 1.5rem; color: var(--ink); }
 .empty .link-btn { display: inline-block; margin-top: 8px; font-size: 1rem; }
 
