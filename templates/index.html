@@ -1,5 +1,13 @@
 {%- set slug = {"数学": "math", "英語": "eng", "国語": "jpn", "理科": "sci", "社会": "soc", "その他": "etc"} -%}
 {%- set wd = "月火水木金土日" -%}
+{%- set examples = {
+  "数学": "三角比の sin と cos がごちゃごちゃになる",
+  "英語": "現在完了と過去形の使い分けがわからない",
+  "国語": "古文の助動詞「けり」と「き」の違いがわからない",
+  "理科": "モル計算で単位がわからなくなる",
+  "社会": "鎌倉幕府の成立年がなぜ2つあるのかわからない",
+  "その他": "テスト前日の勉強の順番、どうしてる？",
+} -%}
 <!doctype html>
 <html lang="ja">
 <head>
@@ -56,7 +64,7 @@
           <div class="chips">
             {% for s in subjects %}
             <label class="chip s-{{ slug[s] }}">
-              <input type="radio" name="subject" value="{{ s }}" {% if (current or "数学") == s %}checked{% endif %}>
+              <input type="radio" name="subject" value="{{ s }}" data-example="例：{{ examples[s] }}" {% if (current or "数学") == s %}checked{% endif %}>
               <span>{{ s }}</span>
             </label>
             {% endfor %}
@@ -66,7 +74,7 @@
         <div class="field">
           <label for="f-title">どこがわからない？</label>
           <input id="f-title" name="title" maxlength="60" required autocomplete="off"
-                 placeholder="例：二次関数の最大値の求め方">
+                 placeholder="例：{{ examples[current or '数学'] }}">
         </div>
 
         <div class="field">
@@ -173,7 +181,7 @@
         <a class="link-btn" href="{{ board_url(current) }}">解決済みも表示する</a>
       {% else %}
         <p class="empty-title">{% if current %}{{ current }}の質問はまだありません{% else %}最初の質問を書いてみよう{% endif %}</p>
-        <p>たとえば「三角比の sin と cos がごちゃごちゃになる」くらいの小さな疑問で大丈夫。問題の写真も貼れます。</p>
+        <p>たとえば「{{ examples[current or "数学"] }}」くらいの小さな疑問で大丈夫。問題の写真も貼れます。</p>
         <a class="link-btn" href="#ask" data-open-composer>質問を書く</a>
       {% endif %}
     </div>
@@ -195,6 +203,10 @@
     composer.open = true;
     setTimeout(() => document.getElementById('f-title').focus(), 50);
   }));
+
+  const titleInput = document.getElementById('f-title');
+  document.querySelectorAll('input[name="subject"]').forEach(r =>
+    r.addEventListener('change', () => { titleInput.placeholder = r.dataset.example; }));
 
   const input = document.getElementById('f-image');
   const drop = document.getElementById('drop');
