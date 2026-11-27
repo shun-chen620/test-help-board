@@ -5,3 +5,5 @@ __pycache__/
 *.PublishSettings
 *.publishsettings
 static/uploads/
+.gemini/
+.impeccable/
