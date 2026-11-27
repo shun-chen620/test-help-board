@@ -1,70 +1,240 @@
+{%- set slug = {"数学": "math", "英語": "eng", "国語": "jpn", "理科": "sci", "社会": "soc", "その他": "etc"} -%}
+{%- set wd = "月火水木金土日" -%}
 <!doctype html>
 <html lang="ja">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>テスト前ヘルプ板</title>
+  <meta name="theme-color" content="#21443a">
+  <title>{% if current %}{{ current }}の質問 - {% endif %}テスト前ヘルプ板</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Klee+One:wght@600&display=swap">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-<header class="hero" style="background-image:url('{{ hero }}')">
-  <div class="hero-inner">
-    <h1>テスト前ヘルプ板</h1>
-    <p>わからない問題、写真でサクッと聞こう。高校生どうしで教え合う掲示板。</p>
-    <div class="countdown">
-      {% if days_left > 0 %}{{ exam_name }}まで あと <strong>{{ days_left }}</strong> 日
-      {% elif days_left == 0 %}{{ exam_name }} 当日！がんばれ！
-      {% else %}{{ exam_name }} おつかれさま！{% endif %}
+<a class="skip" href="#feed">質問一覧へ移動</a>
+
+<header class="board-head" style="--hero: url('{{ hero }}')">
+  <div class="head-inner">
+    <div class="brand">
+      <p class="brand-sub">高校生どうしの教え合い掲示板</p>
+      <h1><a href="{{ board_url() }}">テスト前ヘルプ板</a></h1>
+      <p class="lede">わからない問題は、写真を撮ってそのまま質問。名前はいりません。</p>
+    </div>
+    <div class="countdown" role="status">
+      {% if days_left > 0 %}
+        <span class="cd-label">{{ exam_name }}まで</span>
+        <span class="cd-num">{{ days_left }}<small>日</small></span>
+        <span class="cd-date">{{ exam_date.month }}月{{ exam_date.day }}日（{{ wd[exam_date.weekday()] }}）</span>
+      {% elif days_left == 0 %}
+        <span class="cd-label">{{ exam_name }}</span>
+        <span class="cd-num cd-today">当日</span>
+        <span class="cd-date">落ち着いていこう</span>
+      {% else %}
+        <span class="cd-label">{{ exam_name }}</span>
+        <span class="cd-num cd-today">おつかれ</span>
+        <span class="cd-date">次のテストもがんばろう</span>
+      {% endif %}
     </div>
   </div>
 </header>
 
-<main>
-  <nav class="tabs">
-    <a href="{{ url_for('index') }}" class="{{ 'on' if not current }}">すべて</a>
-    {% for s in subjects %}
-      <a href="{{ url_for('index', subject=s) }}" class="{{ 'on' if current == s }}">{{ s }}</a>
-    {% endfor %}
-  </nav>
+<div class="layout">
+  <aside class="composer-wrap">
+    <details class="composer" id="ask" {% if not posts and not current %}open{% endif %}>
+      <summary>
+        <span class="summary-plus" aria-hidden="true"></span>
+        <span>質問を書く</span>
+        <span class="summary-hint">1分でOK</span>
+      </summary>
+      <form action="{{ url_for('post') }}" method="post" enctype="multipart/form-data" id="ask-form">
+        <input type="hidden" name="back" value="{{ current or '' }}">
 
-  <section class="card form">
-    <h2>質問する</h2>
-    <form action="{{ url_for('post') }}" method="post" enctype="multipart/form-data">
-      <input type="hidden" name="back" value="{{ current or '' }}">
-      <div class="row">
-        <input name="nickname" maxlength="20" placeholder="ニックネーム（空欄で匿名）">
-        <select name="subject">
-          {% for s in subjects %}<option {{ 'selected' if current == s }}>{{ s }}</option>{% endfor %}
-        </select>
+        <fieldset class="subject-pick">
+          <legend>教科</legend>
+          <div class="chips">
+            {% for s in subjects %}
+            <label class="chip s-{{ slug[s] }}">
+              <input type="radio" name="subject" value="{{ s }}" {% if (current or "数学") == s %}checked{% endif %}>
+              <span>{{ s }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </fieldset>
+
+        <div class="field">
+          <label for="f-title">どこがわからない？</label>
+          <input id="f-title" name="title" maxlength="60" required autocomplete="off"
+                 placeholder="例：二次関数の最大値の求め方">
+        </div>
+
+        <div class="field">
+          <label for="f-body">くわしく</label>
+          <textarea id="f-body" name="body" maxlength="1000" required rows="5"
+                    placeholder="どこまで解けて、どこで止まったかを書くと答えてもらいやすいよ"></textarea>
+        </div>
+
+        <div class="field">
+          <span class="label-text">問題の写真 <em>（なくてもOK）</em></span>
+          <label class="drop" id="drop">
+            <input type="file" name="image" accept="image/png,image/jpeg,image/gif,image/webp" id="f-image">
+            <span class="drop-empty">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3l2-2.5h6L17 7h3a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13" r="3.6"/></svg>
+              <span>タップして写真を選ぶ<small>png / jpg / gif / webp・5MBまで</small></span>
+            </span>
+            <span class="drop-preview" id="preview"></span>
+          </label>
+          <p class="field-error" id="image-error" role="alert" hidden></p>
+          <button type="button" class="link-btn" id="clear-image" hidden>写真を外す</button>
+        </div>
+
+        <div class="field">
+          <label for="f-nick">ニックネーム</label>
+          <input id="f-nick" name="nickname" maxlength="20" autocomplete="off" placeholder="空欄なら「名無しの受験生」">
+        </div>
+
+        <button type="submit" class="btn-primary" id="submit">
+          <span class="btn-label">質問を投稿する</span>
+        </button>
+        <p class="fine">本名・学校名・連絡先は書かないでね。</p>
+      </form>
+    </details>
+  </aside>
+
+  <main class="feed-wrap" id="feed">
+    <nav class="tabs" aria-label="教科でしぼりこむ">
+      <div class="tabs-scroll">
+        <a href="{{ board_url(None, open_only) }}" class="tab" {% if not current %}aria-current="page"{% endif %}>
+          すべて{% if open_total %}<span class="count" aria-label="未解決{{ open_total }}件">{{ open_total }}</span>{% endif %}
+        </a>
+        {% for s in subjects %}
+        <a href="{{ board_url(s, open_only) }}" class="tab s-{{ slug[s] }}" {% if current == s %}aria-current="page"{% endif %}>
+          {{ s }}{% if open_counts[s] %}<span class="count" aria-label="未解決{{ open_counts[s] }}件">{{ open_counts[s] }}</span>{% endif %}
+        </a>
+        {% endfor %}
       </div>
-      <input name="title" maxlength="60" required placeholder="タイトル（例：二次関数の最大値がわからない）">
-      <textarea name="body" maxlength="1000" required rows="4" placeholder="どこでつまずいたか書こう"></textarea>
-      <label class="file">問題の写真（任意）<input type="file" name="image" accept="image/*"></label>
-      <button type="submit">投稿する</button>
-    </form>
-  </section>
+    </nav>
 
-  {% for p in posts %}
-  <article class="card post {{ 'solved' if p.solved }}">
-    <div class="meta">
-      <span class="tag">{{ p.subject }}</span>
-      {% if p.solved %}<span class="badge">解決済み</span>{% endif %}
-      <span class="who">{{ p.nickname }} ・ {{ p.created }}</span>
+    <div class="feed-bar">
+      <p class="feed-title">
+        {{ current or "すべての教科" }}{% if open_only %}の未解決{% endif %}
+        <span>{{ posts|length }}件</span>
+      </p>
+      <a class="toggle" href="{{ board_url(current, not open_only) }}" role="switch" aria-checked="{{ 'true' if open_only else 'false' }}">
+        <span class="toggle-track" aria-hidden="true"></span>未解決だけ
+      </a>
     </div>
-    <h3>{{ p.title }}</h3>
-    <p class="body">{{ p.body }}</p>
-    {% if p.image %}<a href="{{ p.image }}" target="_blank"><img src="{{ p.image }}" alt="問題の写真" loading="lazy"></a>{% endif %}
-    {% if not p.solved %}
-    <form action="{{ url_for('solve', row_key=p.RowKey) }}" method="post">
-      <button class="ok" type="submit">わかった！（解決）</button>
-    </form>
-    {% endif %}
-  </article>
-  {% else %}
-  <p class="empty">まだ質問はありません。最初の質問をしてみよう！</p>
-  {% endfor %}
-</main>
 
-<footer><a href="{{ url_for('static', filename='about.html') }}">この掲示板について</a></footer>
+    {% if just_posted %}
+    <p class="notice" role="status">質問を投稿しました。わかったら「わかった！」を押してね。</p>
+    {% endif %}
+
+    {% if posts %}
+    <ol class="feed">
+      {% for p in posts %}
+      <li class="entry s-{{ slug.get(p.subject, 'etc') }}{% if p.solved %} is-solved{% endif %}{% if p.RowKey == just_solved %} just-solved{% endif %}{% if p.RowKey == just_posted %} just-posted{% endif %}" id="p-{{ p.RowKey }}">
+        <div class="entry-meta">
+          <span class="subj">{{ p.subject }}</span>
+          <span class="who">{{ p.nickname }}</span>
+          <time>{{ p.created }}</time>
+        </div>
+        <h2 class="entry-title"><span class="hl">{{ p.title }}</span></h2>
+        <p class="entry-body">{{ p.body }}</p>
+        {% if p.image %}
+        <a class="entry-photo" href="{{ p.image }}" target="_blank" rel="noopener">
+          <img src="{{ p.image }}" alt="「{{ p.title }}」の問題の写真" loading="lazy">
+        </a>
+        {% endif %}
+        <div class="entry-foot">
+          {% if p.solved %}
+            <span class="solved-mark">
+              <svg class="hanamaru" viewBox="0 0 64 64" aria-hidden="true">
+                <path pathLength="1" d="M33 9c-14-1-25 9-25 23s11 24 24 23 23-11 22-24C53 17 44 9 33 10c-9 1-15 8-14 17 1 8 8 13 15 12 6-1 10-6 9-12-1-4-4-7-8-6"/>
+              </svg>
+              解決済み
+            </span>
+          {% else %}
+            <form action="{{ url_for('solve', row_key=p.RowKey) }}" method="post">
+              <input type="hidden" name="back" value="{{ current or '' }}">
+              <button class="btn-solve" type="submit">わかった！</button>
+            </form>
+            <span class="solve-hint">理解できたら押して解決済みに</span>
+          {% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ol>
+    {% else %}
+    <div class="empty">
+      {% if open_only %}
+        <p class="empty-title">未解決の質問はありません</p>
+        <p>{{ current or "どの教科" }}もみんな解決済み。わからないところがあれば質問してみよう。</p>
+        <a class="link-btn" href="{{ board_url(current) }}">解決済みも表示する</a>
+      {% else %}
+        <p class="empty-title">{% if current %}{{ current }}の質問はまだありません{% else %}最初の質問を書いてみよう{% endif %}</p>
+        <p>たとえば「三角比の sin と cos がごちゃごちゃになる」くらいの小さな疑問で大丈夫。問題の写真も貼れます。</p>
+        <a class="link-btn" href="#ask" data-open-composer>質問を書く</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </main>
+</div>
+
+<footer class="site-foot">
+  <a href="{{ url_for('static', filename='about.html') }}">この掲示板について・ルール</a>
+</footer>
+
+<script>
+(() => {
+  const composer = document.getElementById('ask');
+  const wide = matchMedia('(min-width: 960px)');
+  const syncOpen = () => { if (wide.matches) composer.open = true; };
+  syncOpen(); wide.addEventListener('change', syncOpen);
+  document.querySelectorAll('[data-open-composer]').forEach(a => a.addEventListener('click', () => {
+    composer.open = true;
+    setTimeout(() => document.getElementById('f-title').focus(), 50);
+  }));
+
+  const input = document.getElementById('f-image');
+  const drop = document.getElementById('drop');
+  const preview = document.getElementById('preview');
+  const err = document.getElementById('image-error');
+  const clear = document.getElementById('clear-image');
+  const reset = () => {
+    input.value = ''; preview.replaceChildren();
+    drop.classList.remove('has-image'); clear.hidden = true;
+  };
+  input.addEventListener('change', () => {
+    err.hidden = true;
+    const f = input.files[0];
+    if (!f) return reset();
+    if (f.size > 5 * 1024 * 1024) {
+      reset(); err.textContent = 'この写真は5MBより大きいです。小さめの写真を選んでください。'; err.hidden = false; return;
+    }
+    const img = new Image();
+    img.src = URL.createObjectURL(f);
+    img.alt = '選んだ写真のプレビュー';
+    preview.replaceChildren(img);
+    drop.classList.add('has-image'); clear.hidden = false;
+  });
+  clear.addEventListener('click', reset);
+
+  const form = document.getElementById('ask-form');
+  const submit = document.getElementById('submit');
+  form.addEventListener('submit', () => {
+    submit.disabled = true; submit.classList.add('is-loading');
+    submit.querySelector('.btn-label').textContent = '送信中…';
+  });
+  window.addEventListener('pageshow', () => {
+    submit.disabled = false; submit.classList.remove('is-loading');
+    submit.querySelector('.btn-label').textContent = '質問を投稿する';
+  });
+
+  document.querySelectorAll('.btn-solve').forEach(b => b.closest('form').addEventListener('submit', () => {
+    b.disabled = true; b.textContent = '記録中…';
+  }));
+})();
+</script>
 </body>
 </html>

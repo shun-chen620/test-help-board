@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#21443a">
+  <title>うまくいきませんでした - テスト前ヘルプ板</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Klee+One:wght@600&display=swap">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="mini-head"><div class="mini-head-inner"><a href="{{ url_for('index') }}">テスト前ヘルプ板</a></div></header>
+<main class="page">
+  <div class="sheet">
+    <h1>うまくいきませんでした</h1>
+    <p>{{ message }}</p>
+    <a class="back" href="javascript:history.back()">← 前の画面にもどる</a>
+  </div>
+</main>
+</body>
+</html>

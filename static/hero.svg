@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="520" viewBox="0 0 1600 520">
+  <defs>
+    <radialGradient id="g" cx="30%" cy="20%" r="90%">
+      <stop offset="0" stop-color="#2f5a4b"/>
+      <stop offset="1" stop-color="#1d3d33"/>
+    </radialGradient>
+    <filter id="chalk" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="3" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 -1.6 1.1" result="m"/>
+      <feComposite in="SourceGraphic" in2="m" operator="in"/>
+    </filter>
+    <filter id="dust">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012 0.04" numOctaves="3" seed="8"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.10 0"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="520" fill="url(#g)"/>
+  <rect width="1600" height="520" filter="url(#dust)"/>
+  <g filter="url(#chalk)" fill="none" stroke="#f2f4ee" stroke-linecap="round" stroke-width="3" opacity="0.22">
+    <path d="M1010 120 q60 -70 120 0 t120 0"/>
+    <path d="M1000 160 h300 M1150 70 v180"/>
+    <circle cx="1420" cy="330" r="70"/>
+    <path d="M1420 330 l60 -38 M1350 330 h140"/>
+    <path d="M90 430 l120 -90 l60 50 l110 -120"/>
+    <path d="M760 460 c40 -60 90 -60 130 0 s90 60 130 0"/>
+  </g>
+  <g filter="url(#chalk)" fill="#f2f4ee" opacity="0.2" font-family="'Segoe Print','Comic Sans MS','Yu Gothic',sans-serif" font-size="34">
+    <text x="980" y="300">y = ax² + bx + c</text>
+    <text x="1080" y="420">sin²θ + cos²θ = 1</text>
+    <text x="70" y="90" font-size="28">I have been studying since 7.</text>
+    <text x="520" y="380" font-size="30">PV = nRT</text>
+    <text x="1250" y="490" font-size="26">鎌倉 1185</text>
+    <text x="300" y="250" font-size="26">∫₀¹ x dx = ½</text>
+  </g>
+</svg>
