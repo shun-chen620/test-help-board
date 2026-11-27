@@ -76,5 +76,5 @@
 - Storageの接続文字列は App Service の「アプリ設定」（環境変数 `AZURE_STORAGE_CONNECTION_STRING`）に入れ、リポジトリには入れない
 - 発行プロファイルは GitHub の Secrets（`AZURE_WEBAPP_PUBLISH_PROFILE`）に入れ、リポジトリには入れない
 
-サイトのURL：（デプロイ後に記入）
-GitHubリポジトリのURL：（作成後に記入）
+サイトのURL：https://testhelp-uk28fj.azurewebsites.net
+GitHubリポジトリのURL：https://github.com/shun-chen620/test-help-board
